@@ -1,0 +1,2 @@
+# This file exists to ensure the storage directory is created
+# but the uploaded files are not tracked by git.
