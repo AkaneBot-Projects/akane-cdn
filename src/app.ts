@@ -1,17 +1,15 @@
 import fastify, { FastifyInstance } from 'fastify';
 import fastifyMultipart from '@fastify/multipart';
 import fastifyCors from '@fastify/cors';
-import fastifyStatic from '@fastify/static';
-import path from 'path';
 import uploadRoutes from './routes/upload';
 import fileRoutes from './routes/file';
 import config from './config/env';
+import { connectDatabase } from './config/database';
 
-/**
- * Build the Fastify application with all plugins and routes
- * @returns Configured Fastify instance
- */
-export const buildApp = (): FastifyInstance => {
+export const buildApp = async (): Promise<FastifyInstance> => {
+  // Connect to database
+  await connectDatabase();
+  
   const app = fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info',
@@ -26,34 +24,22 @@ export const buildApp = (): FastifyInstance => {
     allowedHeaders: ['Content-Type', 'Authorization']
   });
 
-  // Register fastifyMultipart plugin with a unique name to avoid conflicts
-  /*
-  app.register(fastifyMultipart, {
-    limits: {
-      fileSize: 100 * 1024 * 1024 // 100MB upload limit
-    },
-    attachFieldsToBody: true
-  }, { name: 'mainMultipart' }); // Add a unique name to prevent duplicate registration
-*/
-
-  app.register(fastifyStatic, {
-    root: config.uploadDir,
-    prefix: '/files/', // An alternative way to serve files
-    decorateReply: false
-  });
-
   // Register routes
-  app.register(uploadRoutes, { prefix: '/upload' }); // Add prefixes to better organize routes
-  app.register(fileRoutes, { prefix: '/file' });
+  app.register(uploadRoutes);
+  app.register(fileRoutes); 
 
   // Add a root route for health check
   app.get('/', async (request, reply) => {
-    reply.code(200).send({ status: 'OK', message: 'File server is running' });
+    reply.code(200).send({ 
+      status: 'OK', 
+      message: 'Akane CDN with ImageKit is running',
+      domain: process.env.CUSTOM_DOMAIN || 'https://c.termai.cc'
+    });
   });
 
   // Handle 404 errors
   app.setNotFoundHandler((request, reply) => {
-    reply.code(404).send({ success: false, message: 'Route not found' });
+    reply.code(404).send({ success: false, message: 'File not found' });
   });
 
   // Handle server errors
@@ -66,4 +52,4 @@ export const buildApp = (): FastifyInstance => {
   });
 
   return app;
-}
+};

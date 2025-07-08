@@ -13,9 +13,9 @@ const startServer = async (): Promise<void> => {
       process.exit(1);
     }
 
-    const app = buildApp();
+    const app = await buildApp();
     
-    await app.listen({
+    app.listen({
       port: config.port,
       host: config.host
     });
