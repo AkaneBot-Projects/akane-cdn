@@ -32,8 +32,8 @@ export const buildApp = async (): Promise<FastifyInstance> => {
   app.get('/', async (request, reply) => {
     reply.code(200).send({ 
       status: 'OK', 
-      message: 'Akane CDN with ImageKit is running',
-      domain: process.env.CUSTOM_DOMAIN || 'https://c.termai.cc'
+      message: 'Akane CDN with is running',
+      domain: process.env.CUSTOM_DOMAIN || 'https://cdn.akane.web.id'
     });
   });
 

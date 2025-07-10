@@ -1,5 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { File } from '../models/File';
+import { request as undiciRequest } from 'undici';
 
 interface FileParams {
   id: string;
@@ -10,20 +11,26 @@ export const getFileHandler = async (
   reply: FastifyReply
 ) => {
   const { id } = request.params;
-  
+
   try {
-    // Find file by custom ID
     const fileRecord = await File.findOne({ customId: id });
-    
+
     if (!fileRecord) {
       return reply.status(404).send({ error: 'File not found' });
     }
     
-    // Redirect to ImageKit URL
-    return reply.redirect(fileRecord.imagekitUrl);
+    const externalResponse = await undiciRequest(fileRecord.imagekitUrl);
+    
+    for (const [key, value] of Object.entries(externalResponse.headers)) {
+      if (key.toLowerCase() === 'content-length' || key.toLowerCase() === 'content-type') {
+        reply.header(key, value);
+      }
+    }
+    
+    return reply.send(externalResponse.body);
   } catch (error) {
     request.log.error(error);
-    return reply.status(404).send({ error: 'File not found' });
+    return reply.status(500).send({ error: 'Failed to fetch file' });
   }
 };
 

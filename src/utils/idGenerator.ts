@@ -1,19 +1,17 @@
 import { customAlphabet } from 'nanoid';
 
-// Custom alphabet untuk generate ID yang unik
-const alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-const nanoid = customAlphabet(alphabet, 12);
+const prefixGen = customAlphabet('abcdefghijklmnopqrstuvwxyz', 1);         // 1 char
+const mainIdGen = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 5); // 5 chars
+const suffixGen = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 2); // 2 chars
 
-// Generate ID dengan prefix dan suffix acak
 export const generateCustomId = (): string => {
-  const prefix = customAlphabet('abcdefghijklmnopqrstuvwxyz', 1)();
-  const mainId = nanoid();
-  const suffix = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 6)();
-  
-  return `${prefix}${mainId}${suffix}`;
+  const prefix = prefixGen();
+  const mainId = mainIdGen();
+  const suffix = suffixGen(); 
+
+  return `${prefix}${mainId}${suffix}`; 
 };
 
-// Alternative: Generate ID dengan format seperti contoh Anda
 export const generateShortId = (): string => {
   const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789擥圀';
   let result = '';
